@@ -1,0 +1,15 @@
+{
+  "name": "valoai",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./apps/* dev",
+    "build": "pnpm --filter ./packages/* build && pnpm --filter ./apps/* build",
+    "lint": "pnpm --recursive lint"
+  }
+}
