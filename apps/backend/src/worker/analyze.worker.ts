@@ -1,5 +1,6 @@
 import { Worker } from 'bullmq';
-import youtubedl from 'youtube-dl-exec';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import { eq } from 'drizzle-orm';
@@ -10,6 +11,8 @@ import { fileManager, model, waitForFileActive, ANALYSIS_PROMPT } from '../lib/g
 import { env } from '../env.js';
 import { AnalysisResultSchema } from '@valoai/shared';
 
+const execFileAsync = promisify(execFile);
+
 async function setStatus(jobId: string, status: string) {
   await db.update(jobs).set({ status, updatedAt: new Date() }).where(eq(jobs.id, jobId));
 }
@@ -17,12 +20,13 @@ async function setStatus(jobId: string, status: string) {
 async function downloadVideo(url: string, jobId: string): Promise<string> {
   await fs.mkdir(env.TEMP_DIR, { recursive: true });
   const outPath = path.join(env.TEMP_DIR, `${jobId}.mp4`);
-  await youtubedl(url, {
-    maxFilesize: `${env.MAX_VIDEO_SIZE_MB}m`,
-    matchFilter: `duration <= ${env.MAX_VIDEO_DURATION_MINUTES * 60}`,
-    format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-    output: outPath,
-  });
+  await execFileAsync('yt-dlp', [
+    '--max-filesize', `${env.MAX_VIDEO_SIZE_MB}m`,
+    '--match-filter', `duration <= ${env.MAX_VIDEO_DURATION_MINUTES * 60}`,
+    '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+    '-o', outPath,
+    url,
+  ]);
   return outPath;
 }
 
