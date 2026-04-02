@@ -6,7 +6,7 @@ import { env } from './env.js';
 import { analyzeRoutes } from './routes/analyze.routes.js';
 import './worker/analyze.worker.js';
 
-const app = Fastify({ logger: true });
+const app = Fastify({ logger: true, bodyLimit: 2147483648 });
 
 await app.register(cors, { origin: env.FRONTEND_URL });
 await app.register(multipart, { limits: { fileSize: 2048 * 1024 * 1024 } });
