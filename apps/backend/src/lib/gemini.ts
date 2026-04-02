@@ -1,64 +1,61 @@
-import {
-  GoogleGenerativeAI,
-  SchemaType,
-  type FileMetadataResponse,
-} from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { env } from '../env.js';
 
 const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 export const fileManager = new GoogleAIFileManager(env.GEMINI_API_KEY);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const responseSchema: any = {
+  type: 'object',
+  properties: {
+    summary: { type: 'string' },
+    positives: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    mistakes: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          timestamp: { type: 'string' },
+          description: { type: 'string' },
+          severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+        },
+        required: ['timestamp', 'description', 'severity'],
+      },
+    },
+    improvements: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          category: {
+            type: 'string',
+            enum: ['positioning', 'utility', 'aim', 'game-sense', 'communication'],
+          },
+          advice: { type: 'string' },
+          timestamp: { type: 'string', nullable: true },
+        },
+        required: ['category', 'advice'],
+      },
+    },
+    overall_rating: { type: 'number' },
+  },
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'overall_rating'],
+};
+
 export const model = genAI.getGenerativeModel({
   model: 'gemini-1.5-pro',
   generationConfig: {
     responseMimeType: 'application/json',
-    responseSchema: {
-      type: SchemaType.OBJECT,
-      properties: {
-        summary: { type: SchemaType.STRING },
-        positives: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-        mistakes: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              timestamp: { type: SchemaType.STRING },
-              description: { type: SchemaType.STRING },
-              severity: {
-                type: SchemaType.STRING,
-                enum: ['low', 'medium', 'high'],
-              },
-            },
-            required: ['timestamp', 'description', 'severity'],
-          },
-        },
-        improvements: {
-          type: SchemaType.ARRAY,
-          items: {
-            type: SchemaType.OBJECT,
-            properties: {
-              category: {
-                type: SchemaType.STRING,
-                enum: ['positioning', 'utility', 'aim', 'game-sense', 'communication'],
-              },
-              advice: { type: SchemaType.STRING },
-              timestamp: { type: SchemaType.STRING, nullable: true },
-            },
-            required: ['category', 'advice'],
-          },
-        },
-        overall_rating: { type: SchemaType.NUMBER },
-      },
-      required: ['summary', 'positives', 'mistakes', 'improvements', 'overall_rating'],
-    },
+    responseSchema,
   },
 });
 
-export async function waitForFileActive(file: FileMetadataResponse) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function waitForFileActive(file: any) {
   let current = file;
   while (current.state === 'PROCESSING') {
     await new Promise((r) => setTimeout(r, 3000));
