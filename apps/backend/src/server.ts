@@ -9,7 +9,7 @@ import './worker/analyze.worker.js';
 const app = Fastify({ logger: true });
 
 await app.register(cors, { origin: env.FRONTEND_URL });
-await app.register(multipart);
+await app.register(multipart, { limits: { fileSize: 2048 * 1024 * 1024 } });
 await app.register(rateLimit, {
   max: 5,
   timeWindow: '1 hour',
