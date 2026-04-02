@@ -23,11 +23,11 @@ export async function analyzeRoutes(app: FastifyInstance) {
       .values({ inputType: 'url', inputValue: parsed.data.url, status: 'queued' })
       .returning();
 
-    await analyzeQueue.add('analyze', {
+    analyzeQueue.add('analyze', {
       jobId: job.id,
       inputType: 'url',
       inputValue: parsed.data.url,
-    });
+    }).catch((err) => console.error('Failed to enqueue job:', err));
 
     return reply.status(202).send({ jobId: job.id, status: 'queued' });
   });
