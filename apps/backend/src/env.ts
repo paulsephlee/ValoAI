@@ -8,8 +8,8 @@ const EnvSchema = z.object({
   PORT: z.coerce.number().default(3001),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   TEMP_DIR: z.string().default('/tmp/valoai'),
-  MAX_VIDEO_SIZE_MB: z.coerce.number().default(500),
-  MAX_VIDEO_DURATION_MINUTES: z.coerce.number().default(10),
+  MAX_VIDEO_SIZE_MB: z.coerce.number().default(2048),
+  MAX_VIDEO_DURATION_MINUTES: z.coerce.number().default(60),
 });
 
 const parsed = EnvSchema.safeParse(process.env);

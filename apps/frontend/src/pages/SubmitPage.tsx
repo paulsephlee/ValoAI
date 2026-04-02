@@ -45,8 +45,8 @@ export default function SubmitPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 500 * 1024 * 1024) {
-      setError('File must be under 500MB');
+    if (file.size > 2048 * 1024 * 1024) {
+      setError('File must be under 2GB');
       return;
     }
 
@@ -79,7 +79,7 @@ export default function SubmitPage() {
           Submit Your Clip
         </h2>
         <p className="text-valo-muted text-base mt-2">
-          Upload a clip or paste a video URL. Max 10 minutes.
+          Upload a full game or paste a video URL. Max 60 minutes / 2GB.
         </p>
       </div>
 
@@ -139,7 +139,7 @@ export default function SubmitPage() {
             <p className="text-valo-white font-body font-semibold">
               {uploading ? 'Uploading...' : 'Click to select a video file'}
             </p>
-            <p className="text-valo-muted text-sm mt-1">MP4, MOV, AVI — max 500MB, 10 min</p>
+            <p className="text-valo-muted text-sm mt-1">MP4, MOV, AVI — max 2GB, 60 min</p>
             <input
               type="file"
               accept="video/*"

@@ -21,4 +21,4 @@ await app.register(analyzeRoutes);
 app.get('/api/health', async () => ({ ok: true }));
 
 await app.listen({ port: env.PORT, host: '0.0.0.0' });
-console.log(`Backend running on http://localhost:${env.PORT}`);
+console.log(`ValoAI backend running on port ${env.PORT}`);
