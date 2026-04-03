@@ -72,7 +72,28 @@ export default function SubmitPage() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <div className="text-center mb-8">
+      {!uploading && (
+        <div className="mb-8 grid grid-cols-2 gap-3">
+          {[
+            { icon: '✓', label: 'What You Did Well', desc: 'Highlights the plays and decisions you got right', color: 'text-green-400' },
+            { icon: '✗', label: 'Mistakes', desc: 'Flags errors with timestamps and severity levels', color: 'text-red-700' },
+            { icon: '📈', label: 'How to Improve', desc: 'Actionable tips across aim, positioning, utility and more', color: 'text-blue-400' },
+            { icon: '👥', label: 'Team Positioning', desc: 'Spots where your team\'s setup cost you the round', color: 'text-purple-400' },
+            { icon: '🎙️', label: 'Team Communication', desc: 'Listens to your comms and grades callouts and shot-calling', color: 'text-cyan-400' },
+            { icon: '💬', label: 'Ask the AI', desc: 'Chat with the AI about any moment in your clip', color: 'text-valo-red' },
+          ].map(({ icon, label, desc, color }) => (
+            <div key={label} className="bg-valo-dark border border-valo-border rounded-lg p-4 flex gap-3">
+              <span className={`text-lg flex-shrink-0 ${color}`}>{icon}</span>
+              <div>
+                <p className={`font-heading text-xs uppercase tracking-wider ${color}`}>{label}</p>
+                <p className="text-valo-muted text-xs mt-0.5 font-body">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="text-center mb-6">
         <h2 className="font-heading text-valo-white text-2xl uppercase tracking-wider">
           Submit Your Clip
         </h2>
@@ -113,27 +134,6 @@ export default function SubmitPage() {
         <p className="text-center text-valo-muted text-sm mt-5">
           Average analysis time: <span className="text-valo-white font-semibold">{avgTime}</span>
         </p>
-      )}
-
-      {!uploading && (
-        <div className="mt-8 grid grid-cols-2 gap-3">
-          {[
-            { icon: '✓', label: 'What You Did Well', desc: 'Highlights the plays and decisions you got right', color: 'text-green-400' },
-            { icon: '✗', label: 'Mistakes', desc: 'Flags errors with timestamps and severity levels', color: 'text-red-700' },
-            { icon: '📈', label: 'How to Improve', desc: 'Actionable tips across aim, positioning, utility and more', color: 'text-blue-400' },
-            { icon: '👥', label: 'Team Positioning', desc: 'Spots where your team\'s setup cost you the round', color: 'text-purple-400' },
-            { icon: '🎙️', label: 'Team Communication', desc: 'Listens to your comms and grades callouts and shot-calling', color: 'text-cyan-400' },
-            { icon: '💬', label: 'Ask the AI', desc: 'Chat with the AI about any moment in your clip', color: 'text-valo-red' },
-          ].map(({ icon, label, desc, color }) => (
-            <div key={label} className="bg-valo-dark border border-valo-border rounded-lg p-4 flex gap-3">
-              <span className={`text-lg flex-shrink-0 ${color}`}>{icon}</span>
-              <div>
-                <p className={`font-heading text-xs uppercase tracking-wider ${color}`}>{label}</p>
-                <p className="text-valo-muted text-xs mt-0.5 font-body">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       )}
 
       {error && (
