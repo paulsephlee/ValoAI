@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
 import type { JobResponse, Mistake, Improvement, TeamImprovement, TeamCommunication } from '@valoai/shared';
 
 type ChatMessage = { role: 'user' | 'model'; text: string };
@@ -62,7 +63,19 @@ function ChatSidebar({ jobId, onClose }: { jobId: string; onClose: () => void })
                 ? 'bg-valo-red text-white'
                 : 'bg-valo-border text-valo-white'
             }`}>
-              {m.text}
+              {m.role === 'user' ? m.text : (
+                <ReactMarkdown
+                  components={{
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="ml-2">{children}</li>,
+                    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                    p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                  }}
+                >
+                  {m.text}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
