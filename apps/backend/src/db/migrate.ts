@@ -22,6 +22,9 @@ export async function runMigrations() {
     )
   `);
 
+  await db.execute(sql`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS rank TEXT`);
+  await db.execute(sql`ALTER TABLE jobs ADD COLUMN IF NOT EXISTS agent TEXT`);
+
   await client.end();
   console.log('Database migrations complete');
 }

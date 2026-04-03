@@ -8,6 +8,8 @@ export const jobs = pgTable('jobs', {
   inputValue: text('input_value').notNull(), // file path or URL
   result: jsonb('result').$type<AnalysisResult>(),
   error: text('error'),
+  rank: text('rank'),
+  agent: text('agent'),
   userId: text('user_id'), // nullable — populated when auth is added
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

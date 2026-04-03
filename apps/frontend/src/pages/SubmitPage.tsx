@@ -3,6 +3,25 @@ import { useNavigate } from 'react-router-dom';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
 
+const RANKS = [
+  'Iron 1', 'Iron 2', 'Iron 3',
+  'Bronze 1', 'Bronze 2', 'Bronze 3',
+  'Silver 1', 'Silver 2', 'Silver 3',
+  'Gold 1', 'Gold 2', 'Gold 3',
+  'Platinum 1', 'Platinum 2', 'Platinum 3',
+  'Diamond 1', 'Diamond 2', 'Diamond 3',
+  'Ascendant 1', 'Ascendant 2', 'Ascendant 3',
+  'Immortal 1', 'Immortal 2', 'Immortal 3',
+  'Radiant',
+];
+
+const AGENTS: Record<string, string[]> = {
+  Duelists: ['Iso', 'Jett', 'Neon', 'Phoenix', 'Reyna', 'Raze', 'Yoru'],
+  Initiators: ['Breach', 'Fade', 'Gekko', 'KAY/O', 'Skye', 'Sova'],
+  Controllers: ['Astra', 'Brimstone', 'Harbor', 'Omen', 'Viper'],
+  Sentinels: ['Chamber', 'Cypher', 'Deadlock', 'Killjoy', 'Sage', 'Vyse'],
+};
+
 function formatAvg(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
@@ -10,11 +29,17 @@ function formatAvg(seconds: number): string {
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
 }
 
+const SELECT_CLASS = `w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5
+  text-valo-white font-body text-sm focus:outline-none focus:border-valo-red
+  transition-colors appearance-none cursor-pointer`;
+
 export default function SubmitPage() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [avgTime, setAvgTime] = useState<string | null>(null);
+  const [rank, setRank] = useState('');
+  const [agent, setAgent] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +66,8 @@ export default function SubmitPage() {
 
     const form = new FormData();
     form.append('file', file);
+    if (rank) form.append('rank', rank);
+    if (agent) form.append('agent', agent);
 
     const xhr = new XMLHttpRequest();
 
@@ -72,28 +99,7 @@ export default function SubmitPage() {
 
   return (
     <div className="max-w-xl mx-auto">
-      {!uploading && (
-        <div className="mb-8 grid grid-cols-2 gap-3">
-          {[
-            { icon: '✓', label: 'What You Did Well', desc: 'Highlights the plays and decisions you got right', color: 'text-green-400' },
-            { icon: '✗', label: 'Mistakes', desc: 'Flags errors with timestamps and severity levels', color: 'text-red-700' },
-            { icon: '📈', label: 'How to Improve', desc: 'Actionable tips across aim, positioning, utility and more', color: 'text-blue-400' },
-            { icon: '👥', label: 'Team Positioning', desc: 'Spots where your team\'s setup cost you the round', color: 'text-purple-400' },
-            { icon: '🎙️', label: 'Team Communication', desc: 'Listens to your comms and grades callouts and shot-calling', color: 'text-cyan-400' },
-            { icon: '💬', label: 'Ask the AI', desc: 'Chat with the AI about any moment in your clip', color: 'text-valo-red' },
-          ].map(({ icon, label, desc, color }) => (
-            <div key={label} className="bg-valo-dark border border-valo-border rounded-lg p-4 flex gap-3">
-              <span className={`text-lg flex-shrink-0 ${color}`}>{icon}</span>
-              <div>
-                <p className={`font-heading text-xs uppercase tracking-wider ${color}`}>{label}</p>
-                <p className="text-valo-muted text-xs mt-0.5 font-body">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="text-center mb-6">
+      <div className="text-center mb-8">
         <h2 className="font-heading text-valo-white text-2xl uppercase tracking-wider">
           Submit Your Clip
         </h2>
@@ -101,6 +107,42 @@ export default function SubmitPage() {
           Upload a video file for AI analysis. Max 60 minutes / 2GB.
         </p>
       </div>
+
+      {!uploading && (
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {/* Rank */}
+          <div>
+            <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
+              Your Rank <span className="normal-case text-valo-muted/60">(optional)</span>
+            </label>
+            <div className="relative">
+              <select value={rank} onChange={(e) => setRank(e.target.value)} className={SELECT_CLASS}>
+                <option value="">Select rank...</option>
+                {RANKS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-valo-muted text-xs pointer-events-none">▼</span>
+            </div>
+          </div>
+
+          {/* Agent */}
+          <div>
+            <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
+              Agent Played <span className="normal-case text-valo-muted/60">(optional)</span>
+            </label>
+            <div className="relative">
+              <select value={agent} onChange={(e) => setAgent(e.target.value)} className={SELECT_CLASS}>
+                <option value="">Select agent...</option>
+                {Object.entries(AGENTS).map(([role, agents]) => (
+                  <optgroup key={role} label={role}>
+                    {agents.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-valo-muted text-xs pointer-events-none">▼</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <label
         className={`block border-2 border-dashed border-valo-border rounded-lg p-10

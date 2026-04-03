@@ -340,13 +340,24 @@ export default function ResultsPage() {
         </Section>
       )}
 
-      <button
-        onClick={() => navigate('/')}
-        className="w-full border border-valo-border text-valo-muted font-heading uppercase tracking-wider
-                   py-3 rounded hover:border-valo-muted hover:text-valo-white transition-colors text-sm"
-      >
-        Analyze Another Clip
-      </button>
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          onClick={() => navigate('/upload')}
+          className="border border-valo-border text-valo-muted font-heading uppercase tracking-wider
+                     py-3 rounded hover:border-valo-muted hover:text-valo-white transition-colors text-sm"
+        >
+          Analyze Another Clip
+        </button>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+          }}
+          className="border border-valo-border text-valo-muted font-heading uppercase tracking-wider
+                     py-3 rounded hover:border-valo-muted hover:text-valo-white transition-colors text-sm"
+        >
+          Share Results 🔗
+        </button>
+      </div>
 
       {/* Floating chat button */}
       <button

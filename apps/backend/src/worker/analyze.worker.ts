@@ -41,10 +41,12 @@ async function cleanup(filePath: string) {
 export const worker = new Worker(
   'analyze',
   async (job) => {
-    const { jobId, inputType, inputValue } = job.data as {
+    const { jobId, inputType, inputValue, rank, agent } = job.data as {
       jobId: string;
       inputType: 'upload' | 'url';
       inputValue: string;
+      rank?: string;
+      agent?: string;
     };
 
     let videoPath = inputValue;
@@ -68,8 +70,17 @@ export const worker = new Worker(
 
       // Step 4: Run analysis
       await setStatus(jobId, 'analyzing');
+      const contextNote = [
+        rank ? `The player's rank is: ${rank}.` : '',
+        agent ? `The agent they played is: ${agent}.` : '',
+      ].filter(Boolean).join(' ');
+
+      const prompt = contextNote
+        ? `${ANALYSIS_PROMPT}\n\nPlayer context: ${contextNote} Tailor all feedback accordingly.`
+        : ANALYSIS_PROMPT;
+
       const result = await model.generateContent([
-        ANALYSIS_PROMPT,
+        prompt,
         { fileData: { mimeType: activeFile.mimeType, fileUri: activeFile.uri } },
       ]);
 

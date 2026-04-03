@@ -35,38 +35,38 @@ export async function analyzeRoutes(app: FastifyInstance) {
 
   // POST /api/analyze/upload — submit a video file for analysis
   app.post('/api/analyze/upload', async (request, reply) => {
-    const data = await request.file({
-      limits: { fileSize: env.MAX_VIDEO_SIZE_MB * 1024 * 1024 },
-    });
+    const parts = request.parts({ limits: { fileSize: env.MAX_VIDEO_SIZE_MB * 1024 * 1024 } });
 
-    if (!data) {
-      return reply.status(400).send({ error: 'No file provided' });
+    let fileData: Awaited<ReturnType<typeof request.file>> | null = null;
+    let rank: string | undefined;
+    let agent: string | undefined;
+
+    for await (const part of parts) {
+      if (part.type === 'file') {
+        fileData = part;
+        await fs.mkdir(env.TEMP_DIR, { recursive: true });
+        const [job] = await db
+          .insert(jobs)
+          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent })
+          .returning();
+        const filePath = path.join(env.TEMP_DIR, `${job.id}.mp4`);
+        await pipeline(part.file, createWriteStream(filePath));
+        await db.update(jobs).set({ inputValue: filePath }).where(eq(jobs.id, job.id));
+        await analyzeQueue.add('analyze', {
+          jobId: job.id,
+          inputType: 'upload',
+          inputValue: filePath,
+          rank,
+          agent,
+        });
+        return reply.status(202).send({ jobId: job.id, status: 'queued' });
+      } else {
+        if (part.fieldname === 'rank') rank = part.value as string;
+        if (part.fieldname === 'agent') agent = part.value as string;
+      }
     }
 
-    if (!data.mimetype.startsWith('video/')) {
-      return reply.status(400).send({ error: 'File must be a video' });
-    }
-
-    await fs.mkdir(env.TEMP_DIR, { recursive: true });
-
-    const [job] = await db
-      .insert(jobs)
-      .values({ inputType: 'upload', inputValue: '', status: 'queued' })
-      .returning();
-
-    const filePath = path.join(env.TEMP_DIR, `${job.id}.mp4`);
-    await pipeline(data.file, createWriteStream(filePath));
-
-    // Update with actual file path
-    await db.update(jobs).set({ inputValue: filePath }).where(eq(jobs.id, job.id));
-
-    await analyzeQueue.add('analyze', {
-      jobId: job.id,
-      inputType: 'upload',
-      inputValue: filePath,
-    });
-
-    return reply.status(202).send({ jobId: job.id, status: 'queued' });
+    if (!fileData) return reply.status(400).send({ error: 'No file provided' });
   });
 
   // GET /api/stats — average analysis time from completed jobs
