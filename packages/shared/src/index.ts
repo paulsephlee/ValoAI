@@ -27,17 +27,24 @@ export const ImprovementSchema = z.object({
   timestamp: z.string().nullable(),
 });
 
+export const TeamImprovementSchema = z.object({
+  advice: z.string(),
+  timestamp: z.string().nullable(),
+});
+
 export const AnalysisResultSchema = z.object({
   summary: z.string(),
   positives: z.array(z.string()),
   mistakes: z.array(MistakeSchema),
   improvements: z.array(ImprovementSchema),
+  team_improvements: z.array(TeamImprovementSchema),
   overall_rating: z.number().min(1).max(10),
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 export type Mistake = z.infer<typeof MistakeSchema>;
 export type Improvement = z.infer<typeof ImprovementSchema>;
+export type TeamImprovement = z.infer<typeof TeamImprovementSchema>;
 
 // ── API response types ────────────────────────────────────────────────────────
 

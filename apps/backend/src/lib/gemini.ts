@@ -41,9 +41,20 @@ const responseSchema: any = {
         required: ['category', 'advice'],
       },
     },
+    team_improvements: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          advice: { type: 'string' },
+          timestamp: { type: 'string', nullable: true },
+        },
+        required: ['advice'],
+      },
+    },
     overall_rating: { type: 'number' },
   },
-  required: ['summary', 'positives', 'mistakes', 'improvements', 'overall_rating'],
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'overall_rating'],
 };
 
 export const model = genAI.getGenerativeModel({
@@ -79,6 +90,7 @@ Focus on:
 - Game sense (rotations, information usage, economy decisions)
 - Communication indicators (rushing alone, failing to trade)
 - Minimap awareness (top-left corner of the screen): watch how often the player checks the minimap, whether they react to teammate positions shown on it, whether they rotate or adjust based on where allies are clustered or spread, and whether they leave teammates isolated by not grouping or trading
+- Team positioning (for team_improvements): observe all 5 players visible on the minimap and in the footage — identify positioning mistakes made by the team as a whole, such as being spread too far apart, multiple players holding the same angle, no one covering a flank, or the team not stacking onto a winning fight
 
 Be specific — reference timestamps, locations, and what the player did vs. what they should have done.
 Rate the overall performance from 1–10 where 5 is average for the rank shown.
