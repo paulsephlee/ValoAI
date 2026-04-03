@@ -78,6 +78,23 @@ export async function waitForFileActive(file: any) {
   return current;
 }
 
+const chatModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+export function startAnalysisChat(
+  analysisResult: object,
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[]
+) {
+  const systemPrompt = `You are an expert Valorant coach. The player has just received this AI analysis of their gameplay clip:\n\n${JSON.stringify(analysisResult, null, 2)}\n\nAnswer any questions they have about this specific clip. Be concise, specific, and reference the analysis above. Use Valorant terminology and refer to VCT pro play where relevant.`;
+
+  return chatModel.startChat({
+    history: [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      { role: 'model', parts: [{ text: 'I\'ve reviewed your analysis. What would you like to know about your gameplay?' }] },
+      ...history,
+    ],
+  });
+}
+
 export const ANALYSIS_PROMPT = `You are an elite Valorant coach with deep knowledge of professional VCT play.
 You have studied the 2025 VCT international events — Masters Bangkok, Masters Toronto, and Champions 2025 — including the strategies, rotations, utility setups, and team coordination used by top teams such as Sentinels, Team Liquid, FNATIC, EDG, NRE, Leviatán, LOUD, T1, and others.
 

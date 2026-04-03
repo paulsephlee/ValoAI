@@ -7,6 +7,7 @@ import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { jobs } from '../db/schema.js';
 import { analyzeQueue } from '../lib/queue.js';
+import { startAnalysisChat } from '../lib/gemini.js';
 import { env } from '../env.js';
 import { SubmitUrlRequestSchema } from '@valoai/shared';
 
@@ -76,6 +77,26 @@ export async function analyzeRoutes(app: FastifyInstance) {
     );
     const avg = result.rows[0]?.avg_seconds;
     return reply.send({ avgSeconds: avg ? Math.round(Number(avg)) : null });
+  });
+
+  // POST /api/jobs/:id/chat — chat about a completed analysis
+  app.post('/api/jobs/:id/chat', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const { message, history = [] } = request.body as {
+      message: string;
+      history: { role: 'user' | 'model'; parts: { text: string }[] }[];
+    };
+
+    if (!message?.trim()) return reply.status(400).send({ error: 'Message is required' });
+
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, id));
+    if (!job || job.status !== 'complete' || !job.result) {
+      return reply.status(404).send({ error: 'Analysis not found' });
+    }
+
+    const chat = startAnalysisChat(job.result, history);
+    const result = await chat.sendMessage(message);
+    return reply.send({ response: result.response.text() });
   });
 
   // GET /api/jobs/:id — poll job status

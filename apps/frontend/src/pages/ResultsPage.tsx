@@ -1,7 +1,99 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { JobResponse, Mistake, Improvement, TeamImprovement } from '@valoai/shared';
+
+type ChatMessage = { role: 'user' | 'model'; text: string };
+
+function ChatSidebar({ jobId, onClose }: { jobId: string; onClose: () => void }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'model', text: "I've reviewed your analysis. What would you like to know about your gameplay?" },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || loading) return;
+
+    const userMsg: ChatMessage = { role: 'user', text };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setLoading(true);
+
+    const history = messages
+      .slice(1)
+      .map((m) => ({ role: m.role, parts: [{ text: m.text }] }));
+
+    try {
+      const res = await fetch(`${BACKEND}/api/jobs/${jobId}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history }),
+      });
+      const data = await res.json();
+      setMessages((prev) => [...prev, { role: 'model', text: data.response }]);
+    } catch {
+      setMessages((prev) => [...prev, { role: 'model', text: 'Sorry, something went wrong. Try again.' }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-valo-dark border-l border-valo-border flex flex-col z-50 shadow-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-valo-border">
+        <h3 className="font-heading text-valo-white uppercase tracking-wider text-sm">Ask About Your Clip</h3>
+        <button onClick={onClose} className="text-valo-muted hover:text-valo-white text-xl leading-none">✕</button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {messages.map((m, i) => (
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm font-body ${
+              m.role === 'user'
+                ? 'bg-valo-red text-white'
+                : 'bg-valo-border text-valo-white'
+            }`}>
+              {m.text}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-valo-border rounded-lg px-3 py-2 text-valo-muted text-sm">Thinking...</div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="px-4 py-3 border-t border-valo-border flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && send()}
+          placeholder="Ask anything about your gameplay..."
+          className="flex-1 bg-valo-bg border border-valo-border rounded px-3 py-2 text-valo-white placeholder-valo-muted text-sm focus:outline-none focus:border-valo-red"
+        />
+        <button
+          onClick={send}
+          disabled={loading || !input.trim()}
+          className="bg-valo-red text-white font-heading uppercase tracking-wider px-4 py-2 rounded text-xs disabled:opacity-50 hover:opacity-90 transition-opacity"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
 
@@ -59,6 +151,7 @@ function Section({
 export default function ResultsPage() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
+  const [chatOpen, setChatOpen] = useState(false);
 
   const { data, error } = useQuery<JobResponse>({
     queryKey: ['job', jobId],
@@ -200,6 +293,17 @@ export default function ResultsPage() {
       >
         Analyze Another Clip
       </button>
+
+      {/* Floating chat button */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-6 right-6 bg-valo-red text-white font-heading uppercase tracking-wider
+                   px-5 py-3 rounded-full shadow-lg hover:opacity-90 transition-opacity text-sm z-40"
+      >
+        Ask AI 💬
+      </button>
+
+      {chatOpen && <ChatSidebar jobId={jobId!} onClose={() => setChatOpen(false)} />}
     </div>
   );
 }
