@@ -122,7 +122,6 @@ export default function ResultsPage() {
           <div className={`text-5xl font-heading ${result.overall_rating >= 7 ? 'text-green-400' : result.overall_rating >= 4 ? 'text-yellow-400' : 'text-valo-red'}`}>
             {result.overall_rating}
           </div>
-          <div className="text-valo-muted text-xs">/10</div>
         </div>
       </div>
 
