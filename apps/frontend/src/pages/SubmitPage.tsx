@@ -1,19 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RankSelect from '../components/RankSelect.tsx';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
-
-const RANKS = [
-  'Iron 1', 'Iron 2', 'Iron 3',
-  'Bronze 1', 'Bronze 2', 'Bronze 3',
-  'Silver 1', 'Silver 2', 'Silver 3',
-  'Gold 1', 'Gold 2', 'Gold 3',
-  'Platinum 1', 'Platinum 2', 'Platinum 3',
-  'Diamond 1', 'Diamond 2', 'Diamond 3',
-  'Ascendant 1', 'Ascendant 2', 'Ascendant 3',
-  'Immortal 1', 'Immortal 2', 'Immortal 3',
-  'Radiant',
-];
 
 const AGENTS: Record<string, string[]> = {
   Duelists: ['Iso', 'Jett', 'Neon', 'Phoenix', 'Reyna', 'Raze', 'Yoru'],
@@ -28,10 +17,6 @@ function formatAvg(seconds: number): string {
   const s = seconds % 60;
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
 }
-
-const SELECT_CLASS = `w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5
-  text-valo-white font-body text-sm focus:outline-none focus:border-valo-red
-  transition-colors appearance-none cursor-pointer`;
 
 export default function SubmitPage() {
   const [uploading, setUploading] = useState(false);
@@ -115,13 +100,7 @@ export default function SubmitPage() {
             <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
               Your Rank <span className="normal-case text-valo-muted/60">(optional)</span>
             </label>
-            <div className="relative">
-              <select value={rank} onChange={(e) => setRank(e.target.value)} className={SELECT_CLASS}>
-                <option value="">Select rank...</option>
-                {RANKS.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-valo-muted text-xs pointer-events-none">▼</span>
-            </div>
+            <RankSelect value={rank} onChange={setRank} />
           </div>
 
           {/* Agent */}
