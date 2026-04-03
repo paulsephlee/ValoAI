@@ -109,7 +109,7 @@ export default function SubmitPage() {
               Agent Played <span className="normal-case text-valo-muted/60">(optional)</span>
             </label>
             <div className="relative">
-              <select value={agent} onChange={(e) => setAgent(e.target.value)} className={SELECT_CLASS}>
+              <select value={agent} onChange={(e) => setAgent(e.target.value)} className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5 text-valo-white font-body text-sm focus:outline-none focus:border-valo-red transition-colors appearance-none cursor-pointer">
                 <option value="">Select agent...</option>
                 {Object.entries(AGENTS).map(([role, agents]) => (
                   <optgroup key={role} label={role}>
