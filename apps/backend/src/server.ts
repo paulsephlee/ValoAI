@@ -14,7 +14,7 @@ const app = Fastify({ logger: true, bodyLimit: 2147483648 });
 await app.register(cors, { origin: env.FRONTEND_URL });
 await app.register(multipart, { limits: { fileSize: 2048 * 1024 * 1024 } });
 await app.register(rateLimit, {
-  max: 5,
+  max: 100,
   timeWindow: '1 hour',
   keyGenerator: (req) => req.ip,
 });
