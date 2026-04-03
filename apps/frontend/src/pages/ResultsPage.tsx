@@ -81,7 +81,7 @@ function ChatSidebar({ jobId, onClose }: { jobId: string; onClose: () => void })
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && send()}
           placeholder="Ask anything about your gameplay..."
-          className="flex-1 bg-valo-bg border border-valo-border rounded px-3 py-2 text-valo-white placeholder-valo-muted text-sm focus:outline-none focus:border-valo-red"
+          className="flex-1 bg-white border border-valo-border rounded px-3 py-2 text-black placeholder-gray-400 text-sm focus:outline-none focus:border-valo-red"
         />
         <button
           onClick={send}
