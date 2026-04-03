@@ -124,20 +124,21 @@ function Section({
   title,
   color,
   bg,
-  defaultOpen = true,
+  open,
+  onToggle,
   children,
 }: {
   title: string;
   color: string;
   bg: string;
-  defaultOpen?: boolean;
+  open: boolean;
+  onToggle: () => void;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   return (
     <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
         className={`w-full flex items-center justify-between px-4 py-3 ${bg} border-b border-valo-border`}
       >
         <h3 className={`font-heading ${color} uppercase tracking-wider text-sm`}>{title}</h3>
@@ -152,6 +153,24 @@ export default function ResultsPage() {
   const { jobId } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
   const [chatOpen, setChatOpen] = useState(false);
+  const [sections, setSections] = useState({
+    positives: true,
+    mistakes: true,
+    improvements: true,
+    communication: true,
+    teamImprovements: true,
+  });
+
+  const allOpen = Object.values(sections).every(Boolean);
+
+  function toggle(key: keyof typeof sections) {
+    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  function toggleAll() {
+    const next = !allOpen;
+    setSections({ positives: next, mistakes: next, improvements: next, communication: next, teamImprovements: next });
+  }
 
   const { data, error } = useQuery<JobResponse>({
     queryKey: ['job', jobId],
@@ -205,6 +224,16 @@ export default function ResultsPage() {
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
+      {/* Collapse / Expand all */}
+      <div className="flex justify-end">
+        <button
+          onClick={toggleAll}
+          className="text-valo-muted text-xs font-heading uppercase tracking-wider hover:text-valo-white transition-colors"
+        >
+          {allOpen ? 'Collapse All ▲' : 'Expand All ▼'}
+        </button>
+      </div>
+
       {/* Overall rating — always visible, not collapsible */}
       <div className="bg-valo-dark border border-valo-border rounded-lg p-6">
         <p className="text-valo-muted text-xs uppercase tracking-widest font-body font-bold mb-1">Overall Rating</p>
@@ -213,7 +242,7 @@ export default function ResultsPage() {
 
       {/* Positives */}
       {result.positives.length > 0 && (
-        <Section title="What You Did Well" color="text-green-400" bg="bg-green-900/20">
+        <Section title="What You Did Well" color="text-green-400" bg="bg-green-900/20" open={sections.positives} onToggle={() => toggle('positives')}>
           <ul className="divide-y divide-valo-border">
             {result.positives.map((p, i) => (
               <li key={i} className="flex items-start gap-3 px-4 py-3 text-valo-white font-body text-sm">
@@ -227,7 +256,7 @@ export default function ResultsPage() {
 
       {/* Mistakes */}
       {result.mistakes.length > 0 && (
-        <Section title="Mistakes" color="text-valo-red" bg="bg-red-900/20">
+        <Section title="Mistakes" color="text-valo-red" bg="bg-red-900/20" open={sections.mistakes} onToggle={() => toggle('mistakes')}>
           <ul className="divide-y divide-valo-border">
             {result.mistakes.map((m: Mistake, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -246,7 +275,7 @@ export default function ResultsPage() {
 
       {/* Improvements */}
       {result.improvements.length > 0 && (
-        <Section title="How to Improve" color="text-blue-400" bg="bg-blue-900/20">
+        <Section title="How to Improve" color="text-blue-400" bg="bg-blue-900/20" open={sections.improvements} onToggle={() => toggle('improvements')}>
           <ul className="divide-y divide-valo-border">
             {result.improvements.map((imp: Improvement, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -264,7 +293,7 @@ export default function ResultsPage() {
 
       {/* Team Communication */}
       {result.team_communication.length > 0 && (
-        <Section title="Team Communication" color="text-cyan-400" bg="bg-cyan-900/20">
+        <Section title="Team Communication" color="text-cyan-400" bg="bg-cyan-900/20" open={sections.communication} onToggle={() => toggle('communication')}>
           <ul className="divide-y divide-valo-border">
             {result.team_communication.map((c: TeamCommunication, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -281,7 +310,7 @@ export default function ResultsPage() {
 
       {/* Team Improvements */}
       {result.team_improvements.length > 0 && (
-        <Section title="How to Improve As a Team" color="text-purple-400" bg="bg-purple-900/20">
+        <Section title="How to Improve As a Team" color="text-purple-400" bg="bg-purple-900/20" open={sections.teamImprovements} onToggle={() => toggle('teamImprovements')}>
           <ul className="divide-y divide-valo-border">
             {result.team_improvements.map((t: TeamImprovement, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
