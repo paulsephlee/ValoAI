@@ -1,44 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
 
-const RANK_TIERS: { tier: string; color: string; bg: string; numbers: string[] }[] = [
-  { tier: 'Iron',      color: '#8d8d8d', bg: '#2a2a2a', numbers: ['1','2','3'] },
-  { tier: 'Bronze',    color: '#a0522d', bg: '#2d1f10', numbers: ['1','2','3'] },
-  { tier: 'Silver',    color: '#b0b8c1', bg: '#1e2226', numbers: ['1','2','3'] },
-  { tier: 'Gold',      color: '#f0b429', bg: '#2b2200', numbers: ['1','2','3'] },
-  { tier: 'Platinum',  color: '#47b9c7', bg: '#0a2228', numbers: ['1','2','3'] },
-  { tier: 'Diamond',   color: '#7b68ee', bg: '#16103a', numbers: ['1','2','3'] },
-  { tier: 'Ascendant', color: '#4cb76a', bg: '#0d2218', numbers: ['1','2','3'] },
-  { tier: 'Immortal',  color: '#e05252', bg: '#2a0d0d', numbers: ['1','2','3'] },
-  { tier: 'Radiant',   color: '#ffe44d', bg: '#2b2400', numbers: [] },
-];
+const BASE = 'https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04';
 
-function RankBadge({ tier, color, size = 'sm' }: { tier: string; color: string; size?: 'sm' | 'md' }) {
-  const dim = size === 'md' ? 28 : 22;
-  const font = size === 'md' ? 9 : 7;
-  const abbr = tier.slice(0, 2).toUpperCase();
-  return (
-    <svg width={dim} height={dim} viewBox="0 0 28 28" className="flex-shrink-0">
-      <polygon
-        points="14,2 26,8 26,20 14,26 2,20 2,8"
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-      />
-      <text
-        x="14"
-        y="15"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill={color}
-        fontSize={font + 3}
-        fontWeight="bold"
-        fontFamily="sans-serif"
-      >
-        {abbr}
-      </text>
-    </svg>
-  );
-}
+const RANKS = [
+  { label: 'Iron 1',      img: `${BASE}/3/largeicon.png` },
+  { label: 'Iron 2',      img: `${BASE}/4/largeicon.png` },
+  { label: 'Iron 3',      img: `${BASE}/5/largeicon.png` },
+  { label: 'Bronze 1',    img: `${BASE}/6/largeicon.png` },
+  { label: 'Bronze 2',    img: `${BASE}/7/largeicon.png` },
+  { label: 'Bronze 3',    img: `${BASE}/8/largeicon.png` },
+  { label: 'Silver 1',    img: `${BASE}/9/largeicon.png` },
+  { label: 'Silver 2',    img: `${BASE}/10/largeicon.png` },
+  { label: 'Silver 3',    img: `${BASE}/11/largeicon.png` },
+  { label: 'Gold 1',      img: `${BASE}/12/largeicon.png` },
+  { label: 'Gold 2',      img: `${BASE}/13/largeicon.png` },
+  { label: 'Gold 3',      img: `${BASE}/14/largeicon.png` },
+  { label: 'Platinum 1',  img: `${BASE}/15/largeicon.png` },
+  { label: 'Platinum 2',  img: `${BASE}/16/largeicon.png` },
+  { label: 'Platinum 3',  img: `${BASE}/17/largeicon.png` },
+  { label: 'Diamond 1',   img: `${BASE}/18/largeicon.png` },
+  { label: 'Diamond 2',   img: `${BASE}/19/largeicon.png` },
+  { label: 'Diamond 3',   img: `${BASE}/20/largeicon.png` },
+  { label: 'Ascendant 1', img: `${BASE}/21/largeicon.png` },
+  { label: 'Ascendant 2', img: `${BASE}/22/largeicon.png` },
+  { label: 'Ascendant 3', img: `${BASE}/23/largeicon.png` },
+  { label: 'Immortal 1',  img: `${BASE}/24/largeicon.png` },
+  { label: 'Immortal 2',  img: `${BASE}/25/largeicon.png` },
+  { label: 'Immortal 3',  img: `${BASE}/26/largeicon.png` },
+  { label: 'Radiant',     img: `${BASE}/27/largeicon.png` },
+];
 
 interface RankSelectProps {
   value: string;
@@ -57,23 +47,19 @@ export default function RankSelect({ value, onChange }: RankSelectProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const selected = RANK_TIERS.flatMap((t) =>
-    t.numbers.length
-      ? t.numbers.map((n) => ({ label: `${t.tier} ${n}`, tier: t.tier, color: t.color }))
-      : [{ label: t.tier, tier: t.tier, color: t.color }]
-  ).find((r) => r.label === value);
+  const selected = RANKS.find((r) => r.label === value);
 
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5 text-left
+        className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2 text-left
                    flex items-center gap-2 focus:outline-none focus:border-valo-red transition-colors"
       >
         {selected ? (
           <>
-            <RankBadge tier={selected.tier} color={selected.color} />
+            <img src={selected.img} alt={selected.label} className="w-7 h-7 object-contain flex-shrink-0" />
             <span className="text-valo-white font-body text-sm flex-1">{selected.label}</span>
           </>
         ) : (
@@ -90,27 +76,15 @@ export default function RankSelect({ value, onChange }: RankSelectProps) {
           >
             <span className="text-valo-muted font-body text-sm">None</span>
           </div>
-          {RANK_TIERS.map((t) => (
-            <div key={t.tier}>
-              <div className="px-3 py-1 border-t border-valo-border/50">
-                <span className="text-xs uppercase tracking-wider font-heading" style={{ color: t.color }}>
-                  {t.tier}
-                </span>
-              </div>
-              {(t.numbers.length ? t.numbers : ['']).map((n) => {
-                const label = n ? `${t.tier} ${n}` : t.tier;
-                return (
-                  <div
-                    key={label}
-                    onClick={() => { onChange(label); setOpen(false); }}
-                    className={`px-3 py-2 flex items-center gap-2 cursor-pointer hover:bg-valo-border transition-colors
-                      ${value === label ? 'bg-valo-border' : ''}`}
-                  >
-                    <RankBadge tier={t.tier} color={t.color} />
-                    <span className="text-valo-white font-body text-sm">{label}</span>
-                  </div>
-                );
-              })}
+          {RANKS.map((r) => (
+            <div
+              key={r.label}
+              onClick={() => { onChange(r.label); setOpen(false); }}
+              className={`px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-valo-border transition-colors
+                ${value === r.label ? 'bg-valo-border' : ''}`}
+            >
+              <img src={r.img} alt={r.label} className="w-7 h-7 object-contain flex-shrink-0" />
+              <span className="text-valo-white font-body text-sm">{r.label}</span>
             </div>
           ))}
         </div>
