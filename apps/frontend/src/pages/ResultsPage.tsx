@@ -297,7 +297,9 @@ export default function ResultsPage() {
           <ul className="divide-y divide-valo-border">
             {result.team_communication.map((c: TeamCommunication, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
-                <span className="mt-0.5 flex-shrink-0">{c.type === 'positive' ? '✓' : '✗'}</span>
+                <span className={`mt-0.5 flex-shrink-0 ${c.type === 'positive' ? 'text-green-400' : 'text-red-700'}`}>
+                  {c.type === 'positive' ? '✓' : '✗'}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className={`font-body text-sm ${c.type === 'positive' ? 'text-valo-white' : 'text-valo-white'}`}>{c.observation}</p>
                   {c.timestamp && <p className="text-valo-muted text-xs mt-0.5">{c.timestamp}</p>}
