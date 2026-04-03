@@ -38,7 +38,6 @@ export const AnalysisResultSchema = z.object({
   mistakes: z.array(MistakeSchema),
   improvements: z.array(ImprovementSchema),
   team_improvements: z.array(TeamImprovementSchema),
-  overall_rating: z.number().min(1).max(10),
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;

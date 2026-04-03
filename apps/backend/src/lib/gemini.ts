@@ -52,9 +52,8 @@ const responseSchema: any = {
         required: ['advice'],
       },
     },
-    overall_rating: { type: 'number' },
   },
-  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'overall_rating'],
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements'],
 };
 
 export const model = genAI.getGenerativeModel({
@@ -116,6 +115,5 @@ Focus on:
 Where relevant, mention specific pro-level concepts by name (e.g. "pro teams run a standard default here", "this is a common VCT execute pattern", "pros would use [utility] to clear this corner before committing").
 
 Be specific — reference timestamps, locations, and what the player did vs. what they should have done.
-Rate the overall performance from 1–10 where 5 is average for the rank shown, and 10 is VCT pro level.
 
 Return structured JSON following the provided schema.`;

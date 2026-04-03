@@ -206,16 +206,9 @@ export default function ResultsPage() {
   return (
     <div className="space-y-4 max-w-2xl mx-auto">
       {/* Overall rating — always visible, not collapsible */}
-      <div className="bg-valo-dark border border-valo-border rounded-lg p-6 flex items-center justify-between">
-        <div>
-          <p className="text-valo-muted text-xs uppercase tracking-widest font-body font-bold mb-1">Overall Rating</p>
-          <p className="text-valo-white font-body text-base">{result.summary}</p>
-        </div>
-        <div className="text-center ml-6 flex-shrink-0">
-          <div className={`text-5xl font-heading ${result.overall_rating >= 7 ? 'text-green-400' : result.overall_rating >= 4 ? 'text-yellow-400' : 'text-valo-red'}`}>
-            {result.overall_rating}
-          </div>
-        </div>
+      <div className="bg-valo-dark border border-valo-border rounded-lg p-6">
+        <p className="text-valo-muted text-xs uppercase tracking-widest font-body font-bold mb-1">Overall Rating</p>
+        <p className="text-valo-white font-body text-base">{result.summary}</p>
       </div>
 
       {/* Positives */}
