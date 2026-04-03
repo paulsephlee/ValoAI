@@ -161,7 +161,7 @@ export default function ResultsPage() {
       {result.team_improvements.length > 0 && (
         <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
           <div className="bg-purple-900/20 border-b border-valo-border px-4 py-3">
-            <h3 className="font-heading text-purple-400 uppercase tracking-wider text-sm">Team Improvement</h3>
+            <h3 className="font-heading text-purple-400 uppercase tracking-wider text-sm">How to Improve As a Team</h3>
           </div>
           <ul className="divide-y divide-valo-border">
             {result.team_improvements.map((t: TeamImprovement, i: number) => (
