@@ -32,18 +32,26 @@ export const TeamImprovementSchema = z.object({
   timestamp: z.string().nullable(),
 });
 
+export const TeamCommunicationSchema = z.object({
+  observation: z.string(),
+  timestamp: z.string().nullable(),
+  type: z.enum(['positive', 'negative']),
+});
+
 export const AnalysisResultSchema = z.object({
   summary: z.string(),
   positives: z.array(z.string()),
   mistakes: z.array(MistakeSchema),
   improvements: z.array(ImprovementSchema),
   team_improvements: z.array(TeamImprovementSchema),
+  team_communication: z.array(TeamCommunicationSchema),
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
 export type Mistake = z.infer<typeof MistakeSchema>;
 export type Improvement = z.infer<typeof ImprovementSchema>;
 export type TeamImprovement = z.infer<typeof TeamImprovementSchema>;
+export type TeamCommunication = z.infer<typeof TeamCommunicationSchema>;
 
 // ── API response types ────────────────────────────────────────────────────────
 

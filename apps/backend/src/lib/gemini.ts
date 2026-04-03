@@ -52,8 +52,20 @@ const responseSchema: any = {
         required: ['advice'],
       },
     },
+    team_communication: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          observation: { type: 'string' },
+          timestamp: { type: 'string', nullable: true },
+          type: { type: 'string', enum: ['positive', 'negative'] },
+        },
+        required: ['observation', 'type'],
+      },
+    },
   },
-  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements'],
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'team_communication'],
 };
 
 export const model = genAI.getGenerativeModel({
@@ -111,6 +123,7 @@ Focus on:
 - Communication indicators (rushing alone, failing to trade)
 - Minimap awareness (top-left corner of the screen): watch how often the player checks the minimap, whether they react to teammate positions shown on it, whether they rotate or adjust based on where allies are clustered or spread, and whether they leave teammates isolated by not grouping or trading
 - Team positioning (for team_improvements): observe all 5 players on the minimap and in the footage — identify positioning mistakes the team makes as a whole, comparing to how VCT pro teams structure their setups, defaults, and executes on the same map
+- Team communication (for team_communication): listen closely to the audio for actual player voice comms — note both positives (clear callouts, good info sharing, calm shot-calling) and negatives (vague callouts, silence during executes, arguing after deaths, players not calling their status like low HP or abilities used, talking over each other)
 
 Where relevant, mention specific pro-level concepts by name (e.g. "pro teams run a standard default here", "this is a common VCT execute pattern", "pros would use [utility] to clear this corner before committing").
 
