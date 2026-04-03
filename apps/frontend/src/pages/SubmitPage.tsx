@@ -12,6 +12,7 @@ function formatAvg(seconds: number): string {
 
 export default function SubmitPage() {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [avgTime, setAvgTime] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function SubmitPage() {
       .catch(() => {});
   }, []);
 
-  async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -36,24 +37,37 @@ export default function SubmitPage() {
 
     setError(null);
     setUploading(true);
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch(`${BACKEND}/api/analyze/upload`, {
-        method: 'POST',
-        body: form,
-      });
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.error ?? 'Upload failed');
+    setProgress(0);
+
+    const form = new FormData();
+    form.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        setProgress(Math.round((event.loaded / event.total) * 100));
       }
-      const { jobId } = await res.json();
-      navigate(`/results/${jobId}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const { jobId } = JSON.parse(xhr.responseText);
+        navigate(`/results/${jobId}`);
+      } else {
+        const json = JSON.parse(xhr.responseText);
+        setError(json.error ?? 'Upload failed');
+        setUploading(false);
+      }
+    };
+
+    xhr.onerror = () => {
+      setError('Upload failed — check your connection and try again');
       setUploading(false);
-    }
+    };
+
+    xhr.open('POST', `${BACKEND}/api/analyze/upload`);
+    xhr.send(form);
   }
 
   return (
@@ -74,7 +88,7 @@ export default function SubmitPage() {
       >
         <div className="text-valo-muted text-4xl mb-3">▲</div>
         <p className="text-valo-white font-body font-semibold">
-          {uploading ? 'Uploading...' : 'Click to select a video file'}
+          {uploading ? `Uploading... ${progress}%` : 'Click to select a video file'}
         </p>
         <p className="text-valo-muted text-sm mt-1">MP4, MOV, AVI — max 2GB, 60 min</p>
         <input
@@ -86,7 +100,16 @@ export default function SubmitPage() {
         />
       </label>
 
-      {avgTime && (
+      {uploading && (
+        <div className="mt-4 w-full bg-valo-border rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-valo-red h-2 rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {avgTime && !uploading && (
         <p className="text-center text-valo-muted text-sm mt-5">
           Average analysis time: <span className="text-valo-white font-semibold">{avgTime}</span>
         </p>
