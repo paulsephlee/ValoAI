@@ -78,6 +78,7 @@ Focus on:
 - Positioning (map control, off-angles, exposed positions)
 - Game sense (rotations, information usage, economy decisions)
 - Communication indicators (rushing alone, failing to trade)
+- Minimap awareness (top-left corner of the screen): watch how often the player checks the minimap, whether they react to teammate positions shown on it, whether they rotate or adjust based on where allies are clustered or spread, and whether they leave teammates isolated by not grouping or trading
 
 Be specific — reference timestamps, locations, and what the player did vs. what they should have done.
 Rate the overall performance from 1–10 where 5 is average for the rank shown.
