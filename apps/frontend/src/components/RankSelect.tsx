@@ -1,33 +1,31 @@
 import { useState, useRef, useEffect } from 'react';
 
-const BASE = 'https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04';
-
 const RANKS = [
-  { label: 'Iron 1',      img: `${BASE}/3/largeicon.png` },
-  { label: 'Iron 2',      img: `${BASE}/4/largeicon.png` },
-  { label: 'Iron 3',      img: `${BASE}/5/largeicon.png` },
-  { label: 'Bronze 1',    img: `${BASE}/6/largeicon.png` },
-  { label: 'Bronze 2',    img: `${BASE}/7/largeicon.png` },
-  { label: 'Bronze 3',    img: `${BASE}/8/largeicon.png` },
-  { label: 'Silver 1',    img: `${BASE}/9/largeicon.png` },
-  { label: 'Silver 2',    img: `${BASE}/10/largeicon.png` },
-  { label: 'Silver 3',    img: `${BASE}/11/largeicon.png` },
-  { label: 'Gold 1',      img: `${BASE}/12/largeicon.png` },
-  { label: 'Gold 2',      img: `${BASE}/13/largeicon.png` },
-  { label: 'Gold 3',      img: `${BASE}/14/largeicon.png` },
-  { label: 'Platinum 1',  img: `${BASE}/15/largeicon.png` },
-  { label: 'Platinum 2',  img: `${BASE}/16/largeicon.png` },
-  { label: 'Platinum 3',  img: `${BASE}/17/largeicon.png` },
-  { label: 'Diamond 1',   img: `${BASE}/18/largeicon.png` },
-  { label: 'Diamond 2',   img: `${BASE}/19/largeicon.png` },
-  { label: 'Diamond 3',   img: `${BASE}/20/largeicon.png` },
-  { label: 'Ascendant 1', img: `${BASE}/21/largeicon.png` },
-  { label: 'Ascendant 2', img: `${BASE}/22/largeicon.png` },
-  { label: 'Ascendant 3', img: `${BASE}/23/largeicon.png` },
-  { label: 'Immortal 1',  img: `${BASE}/24/largeicon.png` },
-  { label: 'Immortal 2',  img: `${BASE}/25/largeicon.png` },
-  { label: 'Immortal 3',  img: `${BASE}/26/largeicon.png` },
-  { label: 'Radiant',     img: `${BASE}/27/largeicon.png` },
+  { label: 'Iron 1',      img: '/ranks/iron1.png' },
+  { label: 'Iron 2',      img: '/ranks/iron2.png' },
+  { label: 'Iron 3',      img: '/ranks/iron3.png' },
+  { label: 'Bronze 1',    img: '/ranks/bronze1.png' },
+  { label: 'Bronze 2',    img: '/ranks/bronze2.png' },
+  { label: 'Bronze 3',    img: '/ranks/bronze3.png' },
+  { label: 'Silver 1',    img: '/ranks/silver1.png' },
+  { label: 'Silver 2',    img: '/ranks/silver2.png' },
+  { label: 'Silver 3',    img: '/ranks/silver3.png' },
+  { label: 'Gold 1',      img: '/ranks/gold1.png' },
+  { label: 'Gold 2',      img: '/ranks/gold2.png' },
+  { label: 'Gold 3',      img: '/ranks/gold3.png' },
+  { label: 'Platinum 1',  img: '/ranks/platinum1.png' },
+  { label: 'Platinum 2',  img: '/ranks/platinum2.png' },
+  { label: 'Platinum 3',  img: '/ranks/platinum3.png' },
+  { label: 'Diamond 1',   img: '/ranks/diamond1.png' },
+  { label: 'Diamond 2',   img: '/ranks/diamond2.png' },
+  { label: 'Diamond 3',   img: '/ranks/diamond3.png' },
+  { label: 'Ascendant 1', img: '/ranks/ascendant1.png' },
+  { label: 'Ascendant 2', img: '/ranks/ascendant2.png' },
+  { label: 'Ascendant 3', img: '/ranks/ascendant3.png' },
+  { label: 'Immortal 1',  img: '/ranks/immortal1.png' },
+  { label: 'Immortal 2',  img: '/ranks/immortal2.png' },
+  { label: 'Immortal 3',  img: '/ranks/immortal3.png' },
+  { label: 'Radiant',     img: '/ranks/radiant.png' },
 ];
 
 interface RankSelectProps {
@@ -69,22 +67,30 @@ export default function RankSelect({ value, onChange }: RankSelectProps) {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-valo-dark border border-valo-border rounded shadow-xl max-h-64 overflow-y-auto">
+        <div
+          className="fixed z-[9999] bg-[#0f1923] border border-[#2a3441] rounded shadow-2xl overflow-y-auto"
+          style={{
+            width: ref.current?.getBoundingClientRect().width,
+            top: (ref.current?.getBoundingClientRect().bottom ?? 0) + 4,
+            left: ref.current?.getBoundingClientRect().left,
+            maxHeight: 260,
+          }}
+        >
           <div
-            className="px-3 py-2 hover:bg-valo-border cursor-pointer"
+            className="px-3 py-2 hover:bg-[#1a2535] cursor-pointer"
             onClick={() => { onChange(''); setOpen(false); }}
           >
-            <span className="text-valo-muted font-body text-sm">None</span>
+            <span className="text-[#8b9eb0] font-body text-sm">None</span>
           </div>
           {RANKS.map((r) => (
             <div
               key={r.label}
               onClick={() => { onChange(r.label); setOpen(false); }}
-              className={`px-3 py-2 flex items-center gap-3 cursor-pointer hover:bg-valo-border transition-colors
-                ${value === r.label ? 'bg-valo-border' : ''}`}
+              className={`px-3 py-2 flex items-center gap-3 cursor-pointer transition-colors
+                ${value === r.label ? 'bg-[#1a2535]' : 'hover:bg-[#1a2535]'}`}
             >
               <img src={r.img} alt={r.label} className="w-7 h-7 object-contain flex-shrink-0" />
-              <span className="text-valo-white font-body text-sm">{r.label}</span>
+              <span className="text-white font-body text-sm">{r.label}</span>
             </div>
           ))}
         </div>
