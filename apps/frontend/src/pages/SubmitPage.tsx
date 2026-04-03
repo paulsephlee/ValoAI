@@ -1,12 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
 
+function formatAvg(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
 export default function SubmitPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [avgTime, setAvgTime] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/stats`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.avgSeconds) setAvgTime(formatAvg(data.avgSeconds));
+      })
+      .catch(() => {});
+  }, []);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -68,6 +85,12 @@ export default function SubmitPage() {
           disabled={uploading}
         />
       </label>
+
+      {avgTime && (
+        <p className="text-center text-valo-muted text-sm mt-5">
+          Average analysis time: <span className="text-valo-white font-semibold">{avgTime}</span>
+        </p>
+      )}
 
       {error && (
         <div className="mt-4 p-3 bg-red-900/30 border border-valo-red rounded text-valo-red text-sm">

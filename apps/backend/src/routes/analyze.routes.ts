@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { jobs } from '../db/schema.js';
 import { analyzeQueue } from '../lib/queue.js';
@@ -66,6 +66,16 @@ export async function analyzeRoutes(app: FastifyInstance) {
     });
 
     return reply.status(202).send({ jobId: job.id, status: 'queued' });
+  });
+
+  // GET /api/stats — average analysis time from completed jobs
+  app.get('/api/stats', async (_request, reply) => {
+    const result = await db.execute(
+      sql`SELECT AVG(EXTRACT(EPOCH FROM (updated_at - created_at))) AS avg_seconds
+          FROM jobs WHERE status = 'complete'`
+    );
+    const avg = result.rows[0]?.avg_seconds;
+    return reply.send({ avgSeconds: avg ? Math.round(Number(avg)) : null });
   });
 
   // GET /api/jobs/:id — poll job status
