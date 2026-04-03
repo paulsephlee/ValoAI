@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import type { JobResponse, Mistake, Improvement, TeamImprovement } from '@valoai/shared';
@@ -26,6 +27,34 @@ const CATEGORY_ICONS: Record<string, string> = {
   'game-sense': '🧠',
   communication: '🎙️',
 };
+
+function Section({
+  title,
+  color,
+  bg,
+  defaultOpen = true,
+  children,
+}: {
+  title: string;
+  color: string;
+  bg: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`w-full flex items-center justify-between px-4 py-3 ${bg} border-b border-valo-border`}
+      >
+        <h3 className={`font-heading ${color} uppercase tracking-wider text-sm`}>{title}</h3>
+        <span className={`text-xs ${color} transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+      {open && <div>{children}</div>}
+    </section>
+  );
+}
 
 export default function ResultsPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -82,8 +111,8 @@ export default function ResultsPage() {
   const result = data.result!;
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      {/* Overall rating */}
+    <div className="space-y-4 max-w-2xl mx-auto">
+      {/* Overall rating — always visible, not collapsible */}
       <div className="bg-valo-dark border border-valo-border rounded-lg p-6 flex items-center justify-between">
         <div>
           <p className="text-valo-muted text-xs uppercase tracking-widest font-body font-bold mb-1">Overall Rating</p>
@@ -99,10 +128,7 @@ export default function ResultsPage() {
 
       {/* Positives */}
       {result.positives.length > 0 && (
-        <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
-          <div className="bg-green-900/20 border-b border-valo-border px-4 py-3">
-            <h3 className="font-heading text-green-400 uppercase tracking-wider text-sm">What You Did Well</h3>
-          </div>
+        <Section title="What You Did Well" color="text-green-400" bg="bg-green-900/20">
           <ul className="divide-y divide-valo-border">
             {result.positives.map((p, i) => (
               <li key={i} className="flex items-start gap-3 px-4 py-3 text-valo-white font-body text-sm">
@@ -111,15 +137,12 @@ export default function ResultsPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       )}
 
       {/* Mistakes */}
       {result.mistakes.length > 0 && (
-        <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
-          <div className="bg-red-900/20 border-b border-valo-border px-4 py-3">
-            <h3 className="font-heading text-valo-red uppercase tracking-wider text-sm">Mistakes</h3>
-          </div>
+        <Section title="Mistakes" color="text-valo-red" bg="bg-red-900/20">
           <ul className="divide-y divide-valo-border">
             {result.mistakes.map((m: Mistake, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -133,15 +156,12 @@ export default function ResultsPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       )}
 
       {/* Improvements */}
       {result.improvements.length > 0 && (
-        <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
-          <div className="bg-blue-900/20 border-b border-valo-border px-4 py-3">
-            <h3 className="font-heading text-blue-400 uppercase tracking-wider text-sm">How to Improve</h3>
-          </div>
+        <Section title="How to Improve" color="text-blue-400" bg="bg-blue-900/20">
           <ul className="divide-y divide-valo-border">
             {result.improvements.map((imp: Improvement, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -154,15 +174,12 @@ export default function ResultsPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       )}
 
       {/* Team Improvements */}
       {result.team_improvements.length > 0 && (
-        <section className="bg-valo-dark border border-valo-border rounded-lg overflow-hidden">
-          <div className="bg-purple-900/20 border-b border-valo-border px-4 py-3">
-            <h3 className="font-heading text-purple-400 uppercase tracking-wider text-sm">How to Improve As a Team</h3>
-          </div>
+        <Section title="How to Improve As a Team" color="text-purple-400" bg="bg-purple-900/20">
           <ul className="divide-y divide-valo-border">
             {result.team_improvements.map((t: TeamImprovement, i: number) => (
               <li key={i} className="px-4 py-3 flex items-start gap-3">
@@ -174,7 +191,7 @@ export default function ResultsPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       )}
 
       <button
