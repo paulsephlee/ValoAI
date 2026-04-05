@@ -62,13 +62,18 @@ export const worker = new Worker(
 
       // Step 2: Upload to Gemini File API
       await setStatus(jobId, 'uploading');
+      const fileStat = await fs.stat(videoPath);
+      console.log(`[${jobId}] Video saved — size: ${(fileStat.size / 1024 / 1024).toFixed(2)} MB, mimeType: ${mimeType ?? 'video/mp4'}`);
+
       const uploadResponse = await fileManager.uploadFile(videoPath, {
         mimeType: mimeType ?? 'video/mp4',
         displayName: `valoai-${jobId}`,
       });
+      console.log(`[${jobId}] Gemini upload complete — file name: ${uploadResponse.file.name}, initial state: ${uploadResponse.file.state}`);
 
       // Step 3: Wait for Gemini to process the file
       const activeFile = await waitForFileActive(uploadResponse.file);
+      console.log(`[${jobId}] Gemini file active — uri: ${activeFile.uri}, mimeType: ${activeFile.mimeType}`);
 
       // Step 4: Run analysis
       await setStatus(jobId, 'analyzing');
@@ -77,6 +82,8 @@ export const worker = new Worker(
         agent ? `The agent they played is: ${agent}. Do not suggest a different agent — this is confirmed.` : '',
         map ? `The map being played is: ${map}. Do not suggest a different map — this is confirmed.` : '',
       ].filter(Boolean).join(' ');
+
+      console.log(`[${jobId}] Context note: "${contextNote || '(none)'}"`);
 
       const prompt = contextNote
         ? `${ANALYSIS_PROMPT}\n\nPlayer context: ${contextNote} Tailor all feedback accordingly.`
@@ -87,7 +94,10 @@ export const worker = new Worker(
         { fileData: { mimeType: activeFile.mimeType, fileUri: activeFile.uri } },
       ]);
 
-      const raw = JSON.parse(result.response.text());
+      const responseText = result.response.text();
+      console.log(`[${jobId}] Gemini raw response (first 500 chars): ${responseText.slice(0, 500)}`);
+
+      const raw = JSON.parse(responseText);
       const parsed = AnalysisResultSchema.parse(raw);
 
       // Step 5: Store result
