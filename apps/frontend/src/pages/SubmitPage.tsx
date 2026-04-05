@@ -43,6 +43,11 @@ export default function SubmitPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!agent || !map) {
+      setError('Please select your agent and map before uploading.');
+      return;
+    }
+
     if (file.size > 2048 * 1024 * 1024) {
       setError('File must be under 2GB');
       return;
@@ -110,7 +115,7 @@ export default function SubmitPage() {
           {/* Agent */}
           <div>
             <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
-              Agent Played <span className="normal-case text-valo-muted/60">(optional)</span>
+              Agent Played <span className="text-valo-red">*</span>
             </label>
             <div className="relative">
               <select value={agent} onChange={(e) => setAgent(e.target.value)} className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5 text-valo-white font-body text-sm focus:outline-none focus:border-valo-red transition-colors appearance-none cursor-pointer">
@@ -128,7 +133,7 @@ export default function SubmitPage() {
           {/* Map */}
           <div>
             <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
-              Map <span className="normal-case text-valo-muted/60">(optional)</span>
+              Map <span className="text-valo-red">*</span>
             </label>
             <div className="relative">
               <select value={map} onChange={(e) => setMap(e.target.value)} className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5 text-valo-white font-body text-sm focus:outline-none focus:border-valo-red transition-colors appearance-none cursor-pointer">
