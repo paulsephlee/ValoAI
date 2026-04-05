@@ -11,6 +11,8 @@ const AGENTS: Record<string, string[]> = {
   Sentinels: ['Chamber', 'Cypher', 'Deadlock', 'Killjoy', 'Sage', 'Vyse'],
 };
 
+const MAPS = ['Abyss', 'Ascent', 'Bind', 'Breeze', 'Fracture', 'Haven', 'Icebox', 'Lotus', 'Pearl', 'Split', 'Sunset'];
+
 function formatAvg(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
@@ -25,6 +27,7 @@ export default function SubmitPage() {
   const [avgTime, setAvgTime] = useState<string | null>(null);
   const [rank, setRank] = useState('');
   const [agent, setAgent] = useState('');
+  const [map, setMap] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +56,7 @@ export default function SubmitPage() {
     form.append('file', file);
     if (rank) form.append('rank', rank);
     if (agent) form.append('agent', agent);
+    if (map) form.append('map', map);
 
     const xhr = new XMLHttpRequest();
 
@@ -94,7 +98,7 @@ export default function SubmitPage() {
       </div>
 
       {!uploading && (
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           {/* Rank */}
           <div>
             <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
@@ -116,6 +120,20 @@ export default function SubmitPage() {
                     {agents.map((a) => <option key={a} value={a}>{a}</option>)}
                   </optgroup>
                 ))}
+              </select>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-valo-muted text-xs pointer-events-none">▼</span>
+            </div>
+          </div>
+
+          {/* Map */}
+          <div>
+            <label className="block text-valo-muted text-xs uppercase tracking-wider font-heading mb-1.5">
+              Map <span className="normal-case text-valo-muted/60">(optional)</span>
+            </label>
+            <div className="relative">
+              <select value={map} onChange={(e) => setMap(e.target.value)} className="w-full bg-valo-dark border border-valo-border rounded px-3 py-2.5 text-valo-white font-body text-sm focus:outline-none focus:border-valo-red transition-colors appearance-none cursor-pointer">
+                <option value="">Select map...</option>
+                {MAPS.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-valo-muted text-xs pointer-events-none">▼</span>
             </div>

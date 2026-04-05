@@ -41,13 +41,14 @@ async function cleanup(filePath: string) {
 export const worker = new Worker(
   'analyze',
   async (job) => {
-    const { jobId, inputType, inputValue, mimeType, rank, agent } = job.data as {
+    const { jobId, inputType, inputValue, mimeType, rank, agent, map } = job.data as {
       jobId: string;
       inputType: 'upload' | 'url';
       inputValue: string;
       mimeType?: string;
       rank?: string;
       agent?: string;
+      map?: string;
     };
 
     let videoPath = inputValue;
@@ -73,7 +74,8 @@ export const worker = new Worker(
       await setStatus(jobId, 'analyzing');
       const contextNote = [
         rank ? `The player's rank is: ${rank}.` : '',
-        agent ? `The agent they played is: ${agent}.` : '',
+        agent ? `The agent they played is: ${agent}. Do not suggest a different agent — this is confirmed.` : '',
+        map ? `The map being played is: ${map}. Do not suggest a different map — this is confirmed.` : '',
       ].filter(Boolean).join(' ');
 
       const prompt = contextNote

@@ -40,6 +40,7 @@ export async function analyzeRoutes(app: FastifyInstance) {
     let fileData: Awaited<ReturnType<typeof request.file>> | null = null;
     let rank: string | undefined;
     let agent: string | undefined;
+    let map: string | undefined;
 
     const MIME_TO_EXT: Record<string, string> = {
       'video/mp4': 'mp4',
@@ -60,7 +61,7 @@ export async function analyzeRoutes(app: FastifyInstance) {
         await fs.mkdir(env.TEMP_DIR, { recursive: true });
         const [job] = await db
           .insert(jobs)
-          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent })
+          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent, map })
           .returning();
         const filePath = path.join(env.TEMP_DIR, `${job.id}.${ext}`);
         await pipeline(part.file, createWriteStream(filePath));
@@ -72,11 +73,13 @@ export async function analyzeRoutes(app: FastifyInstance) {
           mimeType,
           rank,
           agent,
+          map,
         });
         return reply.status(202).send({ jobId: job.id, status: 'queued' });
       } else {
         if (part.fieldname === 'rank') rank = part.value as string;
         if (part.fieldname === 'agent') agent = part.value as string;
+        if (part.fieldname === 'map') map = part.value as string;
       }
     }
 
