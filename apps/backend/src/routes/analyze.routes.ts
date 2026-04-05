@@ -41,21 +41,35 @@ export async function analyzeRoutes(app: FastifyInstance) {
     let rank: string | undefined;
     let agent: string | undefined;
 
+    const MIME_TO_EXT: Record<string, string> = {
+      'video/mp4': 'mp4',
+      'video/quicktime': 'mov',
+      'video/x-msvideo': 'avi',
+      'video/webm': 'webm',
+      'video/x-matroska': 'mkv',
+      'video/mpeg': 'mpeg',
+      'video/x-flv': 'flv',
+      'video/3gpp': '3gp',
+    };
+
     for await (const part of parts) {
       if (part.type === 'file') {
         fileData = part;
+        const mimeType = part.mimetype ?? 'video/mp4';
+        const ext = MIME_TO_EXT[mimeType] ?? 'mp4';
         await fs.mkdir(env.TEMP_DIR, { recursive: true });
         const [job] = await db
           .insert(jobs)
           .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent })
           .returning();
-        const filePath = path.join(env.TEMP_DIR, `${job.id}.mp4`);
+        const filePath = path.join(env.TEMP_DIR, `${job.id}.${ext}`);
         await pipeline(part.file, createWriteStream(filePath));
         await db.update(jobs).set({ inputValue: filePath }).where(eq(jobs.id, job.id));
         await analyzeQueue.add('analyze', {
           jobId: job.id,
           inputType: 'upload',
           inputValue: filePath,
+          mimeType,
           rank,
           agent,
         });

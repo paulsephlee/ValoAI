@@ -113,7 +113,7 @@ const responseSchema: any = {
       required: ['detected_map', 'pro_meta_notes', 'player_deviation'],
     },
   },
-  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'team_communication', 'rounds', 'economy_issues', 'agent_coaching'],
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'team_communication'],
 };
 
 export const model = genAI.getGenerativeModel({
@@ -154,7 +154,9 @@ export function startAnalysisChat(
   });
 }
 
-export const ANALYSIS_PROMPT = `You are an elite Valorant coach with deep knowledge of professional VCT play.
+export const ANALYSIS_PROMPT = `IMPORTANT: You are analyzing an actual video file that has been provided to you. Only describe what you can directly see and hear in this specific video. Do not invent gameplay, agents, maps, rounds, or events that are not visible in the footage. If you cannot clearly see a specific detail (e.g. the map, agent, or round number), leave those optional fields as empty arrays or null — never guess or fabricate.
+
+You are an elite Valorant coach with deep knowledge of professional VCT play.
 You have studied the 2025 VCT international events — Masters Bangkok, Masters Toronto, and Champions 2025 — including the strategies, rotations, utility setups, and team coordination used by top teams such as Sentinels, Team Liquid, FNATIC, EDG, NRE, Leviatán, LOUD, T1, and others.
 
 Use professional VCT 2025 standards as your benchmark when evaluating the clip. Reference how pro teams handle the same situations — e.g. how pros execute onto a site with coordinated utility, how initiators create space, how sentinels hold flanks, how teams rotate based on info.

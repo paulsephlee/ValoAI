@@ -41,10 +41,11 @@ async function cleanup(filePath: string) {
 export const worker = new Worker(
   'analyze',
   async (job) => {
-    const { jobId, inputType, inputValue, rank, agent } = job.data as {
+    const { jobId, inputType, inputValue, mimeType, rank, agent } = job.data as {
       jobId: string;
       inputType: 'upload' | 'url';
       inputValue: string;
+      mimeType?: string;
       rank?: string;
       agent?: string;
     };
@@ -61,7 +62,7 @@ export const worker = new Worker(
       // Step 2: Upload to Gemini File API
       await setStatus(jobId, 'uploading');
       const uploadResponse = await fileManager.uploadFile(videoPath, {
-        mimeType: 'video/mp4',
+        mimeType: mimeType ?? 'video/mp4',
         displayName: `valoai-${jobId}`,
       });
 

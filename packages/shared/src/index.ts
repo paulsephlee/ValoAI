@@ -71,10 +71,10 @@ export const AnalysisResultSchema = z.object({
   improvements: z.array(ImprovementSchema),
   team_improvements: z.array(TeamImprovementSchema),
   team_communication: z.array(TeamCommunicationSchema),
-  rounds: z.array(RoundSchema),
-  economy_issues: z.array(EconomyIssueSchema),
-  agent_coaching: z.array(AgentCoachingSchema),
-  map_meta: MapMetaSchema.nullable(),
+  rounds: z.array(RoundSchema).optional().default([]),
+  economy_issues: z.array(EconomyIssueSchema).optional().default([]),
+  agent_coaching: z.array(AgentCoachingSchema).optional().default([]),
+  map_meta: MapMetaSchema.nullable().optional().default(null),
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
