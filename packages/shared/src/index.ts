@@ -38,6 +38,32 @@ export const TeamCommunicationSchema = z.object({
   type: z.enum(['positive', 'negative']),
 });
 
+export const RoundSchema = z.object({
+  round_number: z.number(),
+  outcome: z.enum(['win', 'loss']),
+  summary: z.string(),
+  key_moment: z.string(),
+  economy: z.string().nullable(),
+});
+
+export const EconomyIssueSchema = z.object({
+  round_number: z.number(),
+  issue: z.string(),
+  impact: z.string(),
+});
+
+export const AgentCoachingSchema = z.object({
+  ability: z.string(),
+  advice: z.string(),
+  timestamp: z.string().nullable(),
+});
+
+export const MapMetaSchema = z.object({
+  detected_map: z.string(),
+  pro_meta_notes: z.array(z.string()),
+  player_deviation: z.array(z.string()),
+});
+
 export const AnalysisResultSchema = z.object({
   summary: z.string(),
   positives: z.array(z.string()),
@@ -45,6 +71,10 @@ export const AnalysisResultSchema = z.object({
   improvements: z.array(ImprovementSchema),
   team_improvements: z.array(TeamImprovementSchema),
   team_communication: z.array(TeamCommunicationSchema),
+  rounds: z.array(RoundSchema),
+  economy_issues: z.array(EconomyIssueSchema),
+  agent_coaching: z.array(AgentCoachingSchema),
+  map_meta: MapMetaSchema.nullable(),
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
@@ -52,6 +82,10 @@ export type Mistake = z.infer<typeof MistakeSchema>;
 export type Improvement = z.infer<typeof ImprovementSchema>;
 export type TeamImprovement = z.infer<typeof TeamImprovementSchema>;
 export type TeamCommunication = z.infer<typeof TeamCommunicationSchema>;
+export type Round = z.infer<typeof RoundSchema>;
+export type EconomyIssue = z.infer<typeof EconomyIssueSchema>;
+export type AgentCoaching = z.infer<typeof AgentCoachingSchema>;
+export type MapMeta = z.infer<typeof MapMetaSchema>;
 
 // ── API response types ────────────────────────────────────────────────────────
 

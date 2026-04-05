@@ -64,8 +64,56 @@ const responseSchema: any = {
         required: ['observation', 'type'],
       },
     },
+    rounds: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          round_number: { type: 'integer' },
+          outcome: { type: 'string', enum: ['win', 'loss'] },
+          summary: { type: 'string' },
+          key_moment: { type: 'string' },
+          economy: { type: 'string', nullable: true },
+        },
+        required: ['round_number', 'outcome', 'summary', 'key_moment'],
+      },
+    },
+    economy_issues: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          round_number: { type: 'integer' },
+          issue: { type: 'string' },
+          impact: { type: 'string' },
+        },
+        required: ['round_number', 'issue', 'impact'],
+      },
+    },
+    agent_coaching: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          ability: { type: 'string' },
+          advice: { type: 'string' },
+          timestamp: { type: 'string', nullable: true },
+        },
+        required: ['ability', 'advice'],
+      },
+    },
+    map_meta: {
+      type: 'object',
+      nullable: true,
+      properties: {
+        detected_map: { type: 'string' },
+        pro_meta_notes: { type: 'array', items: { type: 'string' } },
+        player_deviation: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['detected_map', 'pro_meta_notes', 'player_deviation'],
+    },
   },
-  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'team_communication'],
+  required: ['summary', 'positives', 'mistakes', 'improvements', 'team_improvements', 'team_communication', 'rounds', 'economy_issues', 'agent_coaching'],
 };
 
 export const model = genAI.getGenerativeModel({
@@ -124,6 +172,14 @@ Focus on:
 - Minimap awareness (top-left corner of the screen): watch how often the player checks the minimap, whether they react to teammate positions shown on it, whether they rotate or adjust based on where allies are clustered or spread, and whether they leave teammates isolated by not grouping or trading
 - Team positioning (for team_improvements): observe all 5 players on the minimap and in the footage — identify positioning mistakes the team makes as a whole, comparing to how VCT pro teams structure their setups, defaults, and executes on the same map
 - Team communication (for team_communication): listen closely to the audio for actual player voice comms — note both positives (clear callouts, good info sharing, calm shot-calling) and negatives (vague callouts, silence during executes, arguing after deaths, players not calling their status like low HP or abilities used, talking over each other)
+
+Round-by-round breakdown (for rounds): identify each visible round from the HUD — the round number is shown in the top center of the screen. For each round provide: round_number (integer), outcome (win or loss based on which team's score increments), a short summary of what happened, the single most impactful key_moment, and any notable economy note (or null if economy was standard). List every round you can identify in order.
+
+Economy tracking (for economy_issues): watch the buy phase HUD at the start of each round — note the player's and teammates' credits and loadouts. Flag situations such as: buying full when the team is eco/force (breaking economy), force buying after a loss when credits are too low for a proper buy, buying a rifle while teammates run pistols on a force round, or saving when the team could have full bought. For each issue specify round_number, what the issue was (issue), and how it likely impacted the round outcome (impact).
+
+Agent-specific coaching (for agent_coaching): based on the agent the player is using, evaluate every ability (including ultimate). For each ability flag any misuse, underuse, missed opportunities, or excellent usage. Cite pro-level usage of that ability where relevant. Provide the ability name, coaching advice, and timestamp if available.
+
+Map meta (for map_meta): identify the map from the in-game visuals (minimap shape, site layouts, skybox, landmarks). Set detected_map to the map name (e.g. "Ascent", "Bind", "Haven", etc.). In pro_meta_notes list 3-5 key pro meta facts about this specific map in VCT 2025 (dominant site, standard default, common execute patterns, typical sentinel setups). In player_deviation list specific moments where the player or team deviated from the pro meta on this map — be precise about location and round.
 
 Where relevant, mention specific pro-level concepts by name (e.g. "pro teams run a standard default here", "this is a common VCT execute pattern", "pros would use [utility] to clear this corner before committing").
 

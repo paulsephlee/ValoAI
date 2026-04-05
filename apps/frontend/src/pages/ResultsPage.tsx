@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
-import type { JobResponse, Mistake, Improvement, TeamImprovement, TeamCommunication } from '@valoai/shared';
+import type { JobResponse, Mistake, Improvement, TeamImprovement, TeamCommunication, Round, EconomyIssue, AgentCoaching, MapMeta } from '@valoai/shared';
 
 type ChatMessage = { role: 'user' | 'model'; text: string };
 
@@ -172,6 +172,10 @@ export default function ResultsPage() {
     improvements: true,
     communication: true,
     teamImprovements: true,
+    rounds: true,
+    economy: true,
+    agentCoaching: true,
+    mapMeta: true,
   });
 
   const allOpen = Object.values(sections).every(Boolean);
@@ -182,7 +186,7 @@ export default function ResultsPage() {
 
   function toggleAll() {
     const next = !allOpen;
-    setSections({ positives: next, mistakes: next, improvements: next, communication: next, teamImprovements: next });
+    setSections({ positives: next, mistakes: next, improvements: next, communication: next, teamImprovements: next, rounds: next, economy: next, agentCoaching: next, mapMeta: next });
   }
 
   const { data, error } = useQuery<JobResponse>({
@@ -337,6 +341,97 @@ export default function ResultsPage() {
               </li>
             ))}
           </ul>
+        </Section>
+      )}
+
+      {/* Round-by-Round Breakdown */}
+      {result.rounds && result.rounds.length > 0 && (
+        <Section title="Round-by-Round Breakdown" color="text-amber-400" bg="bg-amber-900/20" open={sections.rounds} onToggle={() => toggle('rounds')}>
+          <ul className="divide-y divide-valo-border">
+            {result.rounds.map((r: Round, i: number) => (
+              <li key={i} className="px-4 py-3 flex items-start gap-3">
+                <div className="flex-shrink-0 text-center min-w-[2.5rem]">
+                  <span className="text-xs font-heading text-valo-muted uppercase">R{r.round_number}</span>
+                  <div className={`text-xs font-bold uppercase mt-0.5 ${r.outcome === 'win' ? 'text-green-400' : 'text-valo-red'}`}>
+                    {r.outcome === 'win' ? 'WIN' : 'LOSS'}
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-valo-white font-body text-sm">{r.summary}</p>
+                  <p className="text-amber-400 text-xs mt-1">⚡ {r.key_moment}</p>
+                  {r.economy && <p className="text-valo-muted text-xs mt-0.5">💰 {r.economy}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* Economy Issues */}
+      {result.economy_issues && result.economy_issues.length > 0 && (
+        <Section title="Economy Tracking" color="text-yellow-400" bg="bg-yellow-900/20" open={sections.economy} onToggle={() => toggle('economy')}>
+          <ul className="divide-y divide-valo-border">
+            {result.economy_issues.map((e: EconomyIssue, i: number) => (
+              <li key={i} className="px-4 py-3 flex items-start gap-3">
+                <span className="flex-shrink-0 text-xs font-heading text-valo-muted uppercase min-w-[2.5rem]">R{e.round_number}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-valo-white font-body text-sm">{e.issue}</p>
+                  <p className="text-valo-muted text-xs mt-0.5">Impact: {e.impact}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* Agent-Specific Coaching */}
+      {result.agent_coaching && result.agent_coaching.length > 0 && (
+        <Section title="Agent Coaching" color="text-pink-400" bg="bg-pink-900/20" open={sections.agentCoaching} onToggle={() => toggle('agentCoaching')}>
+          <ul className="divide-y divide-valo-border">
+            {result.agent_coaching.map((a: AgentCoaching, i: number) => (
+              <li key={i} className="px-4 py-3 flex items-start gap-3">
+                <span className="text-pink-400 text-sm font-heading uppercase flex-shrink-0 min-w-[4rem]">{a.ability}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-valo-white font-body text-sm">{a.advice}</p>
+                  {a.timestamp && <p className="text-valo-muted text-xs mt-0.5">{a.timestamp}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* Map Meta */}
+      {result.map_meta && (
+        <Section title={`Map Meta — ${(result.map_meta as MapMeta).detected_map}`} color="text-teal-400" bg="bg-teal-900/20" open={sections.mapMeta} onToggle={() => toggle('mapMeta')}>
+          <div className="px-4 py-3 space-y-4">
+            {(result.map_meta as MapMeta).pro_meta_notes.length > 0 && (
+              <div>
+                <p className="text-teal-400 text-xs font-heading uppercase tracking-wider mb-2">VCT Pro Meta</p>
+                <ul className="space-y-1">
+                  {(result.map_meta as MapMeta).pro_meta_notes.map((note: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2 text-valo-white font-body text-sm">
+                      <span className="text-teal-400 flex-shrink-0 mt-0.5">•</span>
+                      {note}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(result.map_meta as MapMeta).player_deviation.length > 0 && (
+              <div>
+                <p className="text-orange-400 text-xs font-heading uppercase tracking-wider mb-2">Your Deviations from Meta</p>
+                <ul className="space-y-1">
+                  {(result.map_meta as MapMeta).player_deviation.map((dev: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2 text-valo-white font-body text-sm">
+                      <span className="text-orange-400 flex-shrink-0 mt-0.5">△</span>
+                      {dev}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </Section>
       )}
 
