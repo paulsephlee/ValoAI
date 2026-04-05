@@ -53,10 +53,10 @@ export default function SubmitPage() {
     setProgress(0);
 
     const form = new FormData();
-    form.append('file', file);
     if (rank) form.append('rank', rank);
     if (agent) form.append('agent', agent);
     if (map) form.append('map', map);
+    form.append('file', file);
 
     const xhr = new XMLHttpRequest();
 
