@@ -35,6 +35,7 @@ export async function analyzeRoutes(app: FastifyInstance) {
 
   // POST /api/analyze/upload — submit a video file for analysis
   app.post('/api/analyze/upload', async (request, reply) => {
+    try {
     const parts = request.parts({ limits: { fileSize: env.MAX_VIDEO_SIZE_MB * 1024 * 1024 } });
 
     let fileData: Awaited<ReturnType<typeof request.file>> | null = null;
@@ -84,6 +85,11 @@ export async function analyzeRoutes(app: FastifyInstance) {
     }
 
     if (!fileData) return reply.status(400).send({ error: 'No file provided' });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Upload route error:', message, err);
+      return reply.status(500).send({ error: message });
+    }
   });
 
   // GET /api/stats — average analysis time from completed jobs
