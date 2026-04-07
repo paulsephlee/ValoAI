@@ -1,5 +1,3 @@
-import { execFile } from 'child_process';
-import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import { eq, or, sql } from 'drizzle-orm';
@@ -9,7 +7,6 @@ import { fileManager, model, waitForFileActive, ANALYSIS_PROMPT } from '../lib/g
 import { env } from '../env.js';
 import { AnalysisResultSchema } from '@valoai/shared';
 
-const execFileAsync = promisify(execFile);
 const MAX_CONCURRENCY = 2;
 let activeJobs = 0;
 
