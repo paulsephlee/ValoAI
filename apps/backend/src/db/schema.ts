@@ -11,6 +11,7 @@ export const jobs = pgTable('jobs', {
   rank: text('rank'),
   agent: text('agent'),
   map: text('map'),
+  mimeType: text('mime_type'),
   userId: text('user_id'), // nullable — populated when auth is added
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

@@ -6,32 +6,10 @@ import { createWriteStream } from 'fs';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { jobs } from '../db/schema.js';
-import { analyzeQueue } from '../lib/queue.js';
 import { startAnalysisChat } from '../lib/gemini.js';
 import { env } from '../env.js';
-import { SubmitUrlRequestSchema } from '@valoai/shared';
 
 export async function analyzeRoutes(app: FastifyInstance) {
-  // POST /api/analyze/url — submit a video URL for analysis
-  app.post('/api/analyze/url', async (request, reply) => {
-    const parsed = SubmitUrlRequestSchema.safeParse(request.body);
-    if (!parsed.success) {
-      return reply.status(400).send({ error: 'Invalid URL' });
-    }
-
-    const [job] = await db
-      .insert(jobs)
-      .values({ inputType: 'url', inputValue: parsed.data.url, status: 'queued' })
-      .returning();
-
-    analyzeQueue.add('analyze', {
-      jobId: job.id,
-      inputType: 'url',
-      inputValue: parsed.data.url,
-    }).catch((err) => console.error('Failed to enqueue job:', err));
-
-    return reply.status(202).send({ jobId: job.id, status: 'queued' });
-  });
 
   // POST /api/analyze/upload — submit a video file for analysis
   app.post('/api/analyze/upload', async (request, reply) => {
@@ -62,20 +40,11 @@ export async function analyzeRoutes(app: FastifyInstance) {
         await fs.mkdir(env.TEMP_DIR, { recursive: true });
         const [job] = await db
           .insert(jobs)
-          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent, map })
+          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent, map, mimeType })
           .returning();
         const filePath = path.join(env.TEMP_DIR, `${job.id}.${ext}`);
         await pipeline(part.file, createWriteStream(filePath));
         await db.update(jobs).set({ inputValue: filePath }).where(eq(jobs.id, job.id));
-        await analyzeQueue.add('analyze', {
-          jobId: job.id,
-          inputType: 'upload',
-          inputValue: filePath,
-          mimeType,
-          rank,
-          agent,
-          map,
-        });
         return reply.status(202).send({ jobId: job.id, status: 'queued' });
       } else {
         if (part.fieldname === 'rank') rank = part.value as string;

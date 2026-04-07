@@ -3,7 +3,6 @@ import 'dotenv/config';
 
 const EnvSchema = z.object({
   DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().url(),
   GEMINI_API_KEY: z.string().min(1),
   PORT: z.coerce.number().default(3001),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
