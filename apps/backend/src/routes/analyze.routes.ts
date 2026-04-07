@@ -38,13 +38,14 @@ export async function analyzeRoutes(app: FastifyInstance) {
         const mimeType = part.mimetype ?? 'video/mp4';
         const ext = MIME_TO_EXT[mimeType] ?? 'mp4';
         await fs.mkdir(env.TEMP_DIR, { recursive: true });
+        // Save file to disk FIRST — worker must not see the job until the file is ready
+        const tempPath = path.join(env.TEMP_DIR, `tmp-${Date.now()}.${ext}`);
+        await pipeline(part.file, createWriteStream(tempPath));
+        // Now insert the job with the final path already known
         const [job] = await db
           .insert(jobs)
-          .values({ inputType: 'upload', inputValue: '', status: 'queued', rank, agent, map, mimeType })
+          .values({ inputType: 'upload', inputValue: tempPath, status: 'queued', rank, agent, map, mimeType })
           .returning();
-        const filePath = path.join(env.TEMP_DIR, `${job.id}.${ext}`);
-        await pipeline(part.file, createWriteStream(filePath));
-        await db.update(jobs).set({ inputValue: filePath }).where(eq(jobs.id, job.id));
         return reply.status(202).send({ jobId: job.id, status: 'queued' });
       } else {
         if (part.fieldname === 'rank') rank = part.value as string;

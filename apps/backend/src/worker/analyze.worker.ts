@@ -86,6 +86,7 @@ async function processJob(job: typeof jobs.$inferSelect) {
 
 // Atomically claim one queued job using FOR UPDATE SKIP LOCKED
 async function claimNextJob(): Promise<typeof jobs.$inferSelect | null> {
+  // Raw SQL only to get the ID — avoids snake_case/camelCase mapping issues
   const result = await db.execute(sql`
     UPDATE jobs
     SET status = 'uploading', updated_at = NOW()
@@ -96,9 +97,13 @@ async function claimNextJob(): Promise<typeof jobs.$inferSelect | null> {
       LIMIT 1
       FOR UPDATE SKIP LOCKED
     )
-    RETURNING *
+    RETURNING id
   `);
-  return (result.rows[0] as typeof jobs.$inferSelect) ?? null;
+  const row = result.rows[0] as { id: string } | undefined;
+  if (!row) return null;
+  // Fetch full row via Drizzle so column names are properly camelCased
+  const [job] = await db.select().from(jobs).where(eq(jobs.id, row.id));
+  return job ?? null;
 }
 
 async function pollForJobs() {
