@@ -11,7 +11,19 @@ await runMigrations();
 
 const app = Fastify({ logger: true, bodyLimit: 2147483648 });
 
-await app.register(cors, { origin: env.FRONTEND_URL });
+await app.register(cors, {
+  origin: (origin, cb) => {
+    // Allow requests with no origin (e.g. curl, Postman, same-origin)
+    if (!origin) return cb(null, true);
+    // Allow localhost for local dev
+    if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return cb(null, true);
+    // Allow any Vercel deployment of this project
+    if (origin.includes('vercel.app')) return cb(null, true);
+    // Allow the configured frontend URL (strip trailing slash for comparison)
+    if (origin === env.FRONTEND_URL.replace(/\/$/, '')) return cb(null, true);
+    cb(new Error('Not allowed by CORS'), false);
+  },
+});
 await app.register(multipart, { limits: { fileSize: env.MAX_VIDEO_SIZE_MB * 1024 * 1024 } });
 await app.register(rateLimit, {
   max: 100,
